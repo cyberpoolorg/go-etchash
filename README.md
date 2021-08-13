@@ -2,7 +2,6 @@
 
 Etchash go module intended for use by core-pool (and open-ethereum-pool).
 
-* for core-pool see https://github.com/etclabscore/open-etc-pool
 * for more information on etchash see https://github.com/eth-classic/etchash
 * supports etchash, ethash & ubqhash
 
