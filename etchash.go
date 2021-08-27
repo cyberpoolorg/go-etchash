@@ -420,24 +420,24 @@ type Light struct {
 }
 
 // Verify checks whether the block's nonce is valid.
-func (l *Light) Verify(block Block) bool {
+func (l *Light) Verify(block Block) (bool, int64) {
 	// TODO: do etchash_quick_verify before getCache in order
 	// to prevent DOS attacks.
 	blockNum := block.NumberU64()
 	if blockNum >= epochLengthDefault*2048 {
 		log.Debug(fmt.Sprintf("block number %d too high, limit is %d", blockNum, epochLengthDefault*2048))
-		return false
+		return false, 0
 	}
 
 	difficulty := block.Difficulty()
 	/* Cannot happen if block header diff is validated prior to PoW, but can
-		 happen if PoW is checked first due to parallel PoW checking.
-		 We could check the minimum valid difficulty but for SoC we avoid (duplicating)
+	   happen if PoW is checked first due to parallel PoW checking.
+	   We could check the minimum valid difficulty but for SoC we avoid (duplicating)
 	   Ethereum protocol consensus rules here which are not in scope of Etchash
 	*/
 	if difficulty.Cmp(common.Big0) == 0 {
 		log.Debug("invalid block difficulty")
-		return false
+		return false, 0
 	}
 
 	epochLength := calcEpochLength(blockNum, l.ecip1099FBlock)
@@ -453,12 +453,14 @@ func (l *Light) Verify(block Block) bool {
 
 	// avoid mixdigest malleability as it's not included in a block's "hashNononce"
 	if block.MixDigest() != mixDigest {
-		return false
+		return false, 0
 	}
 
 	// The actual check.
 	target := new(big.Int).Div(maxUint256, difficulty)
-	return result.Big().Cmp(target) <= 0
+	ret := result.Big().Cmp(target) <= 0
+	actualDiff := new(big.Int).Div(maxUint256, result.Big())
+	return ret, actualDiff.Int64()
 }
 
 // compute() to get mixhash and result
