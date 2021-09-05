@@ -457,6 +457,7 @@ func (l *Light) Verify(block Block) (bool) {
 	}
 
 	// The actual check.
+	target := new(big.Int).Div(maxUint256, difficulty)
 	return result.Big().Cmp(target) <= 0
 }
 
