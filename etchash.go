@@ -457,7 +457,7 @@ func (l *Light) Verify(block Block) (bool) {
 	}
 
 	// The actual check.
-
+	return result.Big().Cmp(target) <= 0
 }
 
 // compute() to get mixhash and result
